@@ -67,4 +67,4 @@ random.seed(42)
 
 est = estimator.SKCompat(classifier)
 est.fit(X_train, y_train, batch_size=128, steps=100)
-print(accuracy_score(est.predict(X_test)['classes'], y_test))
+print(accuracy_score(est.predict(X_test), y_test))
