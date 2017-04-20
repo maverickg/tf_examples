@@ -9,6 +9,7 @@ import tensorflow as tf
 from tensorflow.contrib import layers
 from tensorflow.contrib import learn
 
+from tensorflow.contrib.learn.python.learn.estimators import estimator
 
 train = pandas.read_csv('data/titanic_train.csv')
 y, X = train['Survived'], train[['Age', 'SibSp', 'Fare']].fillna(0)
@@ -25,8 +26,12 @@ random.seed(42)
 tflr = learn.LinearClassifier(n_classes=2,
     feature_columns=learn.infer_real_valued_columns_from_input(X_train),
     optimizer=tf.train.GradientDescentOptimizer(learning_rate=0.05))
-tflr.fit(X_train, y_train, batch_size=128, steps=500)
-print(accuracy_score(tflr.predict(X_test), y_test))
+# tflr.fit(X_train, y_train, batch_size=128, steps=500)
+# print(accuracy_score(tflr.predict(X_test), y_test))
+
+est = estimator.SKCompat(tflr)
+est.fit(X_train, y_train, batch_size=128, steps=500)
+print(accuracy_score(est.predict(X_test)["classes"], y_test))
 
 # 3 layer neural network with rectified linear activation.
 
@@ -35,8 +40,14 @@ classifier = learn.DNNClassifier(hidden_units=[10, 20, 10],
     n_classes=2,
     feature_columns=learn.infer_real_valued_columns_from_input(X_train),
     optimizer=tf.train.GradientDescentOptimizer(learning_rate=0.05))
-classifier.fit(X_train, y_train, batch_size=128, steps=500)
-print(accuracy_score(classifier.predict(X_test), y_test))
+# classifier.fit(X_train, y_train, batch_size=128, steps=500)
+# print(accuracy_score(classifier.predict(X_test), y_test))
+## use SKCompat
+
+est = estimator.SKCompat(classifier)
+est.fit(X_train, y_train, batch_size=128, steps=500)
+print(accuracy_score(est.predict(X_test)['classes'], y_test))
+
 
 # 3 layer neural network with hyperbolic tangent activation.
 
@@ -50,7 +61,10 @@ def dnn_tanh(features, target):
     return tf.argmax(prediction, dimension=1), loss, train_op
 
 random.seed(42)
-classifier = learn.Estimator(model_fn=dnn_tanh)
-classifier.fit(X_train, y_train, batch_size=128, steps=100)
-print(accuracy_score(classifier.predict(X_test), y_test))
+# classifier = learn.Estimator(model_fn=dnn_tanh)
+# classifier.fit(X_train, y_train, batch_size=128, steps=100)
+# print(accuracy_score(classifier.predict(X_test), y_test))
 
+est = estimator.SKCompat(classifier)
+est.fit(X_train, y_train, batch_size=128, steps=100)
+print(accuracy_score(est.predict(X_test)['classes'], y_test))
